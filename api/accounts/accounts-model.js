@@ -12,17 +12,29 @@ const getById = (id) => {
 
 const create = (account) => {
   // DO YOUR MAGIC
-  return db('accounts').insert(account).first();
+  return db('accounts')
+    .insert(account)
+    .then(([id]) => {
+      return getById(id);
+    });
 };
 
-const updateById = (id, account) => {
+const updateById = async (id, account) => {
   // DO YOUR MAGIC
-  return db('accounts').where({ id }).insert(account).first();
+  const updatedAccount = await db.transaction(async (trx) => {
+    await trx('accounts').where({ id }).update(account);
+    return await trx('accounts').where({ id }).first();
+  });
+  return updatedAccount;
 };
 
 const deleteById = (id) => {
   // DO YOUR MAGIC
   return db('accounts').where({ id }).del();
+};
+
+const getByName = (name) => {
+  return db('accounts').where({ name }).first();
 };
 
 module.exports = {
@@ -31,4 +43,5 @@ module.exports = {
   create,
   updateById,
   deleteById,
+  getByName,
 };
